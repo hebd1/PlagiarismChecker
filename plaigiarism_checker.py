@@ -31,15 +31,25 @@ def calculate_score(confidence):
     elif mean >= 0.50:
         print('PLAGIARISM DETECTED!! \n Average score exceeded the threshold \n Better call your lawyer..')
     else:
-        print('Looks like your document is ok')
+        print('Looks like your document is OK:)')
+
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 def main():
-    print("Welcome to plagiarism checker!")
+    print("Welcome to plagiarism checker!\n")
     if len(sys.argv) <= 1:
-        # filename = input("Please enter a filename to check: ")
+        #print('A command line argument is required to run the script. Please specify a file to check.')
         filename = "test2.txt"
     else:
         filename = sys.argv[1]
+        print('Checking %s for plagiarism...\n' % (filename))
     with open(filename, 'r') as file:
         start = 0
         end = 33
@@ -55,13 +65,16 @@ def main():
             chunk = data[start:end]
             chunks.append(chunk)
     confidence = []
+    itr = 1
     for chunk in chunks:
+        printProgressBar(itr, len(chunks))
         response = google_search(str(chunk), my_api_key, my_cse_id)
         num_results = response.get('searchInformation').get('totalResults')
         if num_results != '0':
             for item in response.get('items'):
                 web_snippet = ''.join(item['snippet'][0:203])
                 confidence.append(snippet_confidence(web_snippet, str(chunk)))
+        itr = itr + 1
     calculate_score(confidence)
     
 
